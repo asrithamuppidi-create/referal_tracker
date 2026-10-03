@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NxtWave Growth - Referral Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input, button {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        input[type="text"] {
+            border: 2px solid #e0e0e0;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+        }
+        
+        .result-box h3 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .code-display {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+        
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        
+        .share-buttons button {
+            flex: 1;
+            padding: 10px;
+            font-size: 12px;
+        }
+        
+        .whatsapp-btn {
+            background: #25D366 !important;
+        }
+        
+        .whatsapp-btn:hover {
+            background: #1aad4f !important;
+        }
+        
+        .error {
+            background: #ffe0e0;
+            border-left-color: #ff6b6b;
+            color: #d32f2f;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .stats {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .leaderboard {
+            margin-top: 20px;
+        }
+        
+        .leaderboard h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .leaderboard-list {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+        
+        .rank {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 20px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-size: 14px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 NxtWave Growth</h1>
+        <p class="subtitle">Build Your First AI Project in 60 Minutes</p>
+        
+        <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" placeholder="Enter your name" autocomplete="off">
+        </div>
+        
+        <button onclick="registerStudent()">Get My Code</button>
+        
+        <div class="loading" id="loading">Registering...</div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="result-box" id="resultBox">
+            <h3>Your Referral Code:</h3>
+            <div class="code-display" id="codeDisplay"></div>
+            <div class="share-buttons">
+                <button class="whatsapp-btn" onclick="shareWhatsApp()">📱 Share on WhatsApp</button>
+                <button onclick="copyCode()">📋 Copy Code</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span>Total Registrations:</span>
+                <span class="stat-value" id="totalStats">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Your Referrals:</span>
+                <span class="stat-value" id="yourReferrals">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Spots Remaining:</span>
+                <span class="stat-value" id="remaining">500</span>
+            </div>
+            
+            <div class="leaderboard">
+                <h3>🏆 Top Referrers</h3>
+                <div class="leaderboard-list" id="leaderboardList">
+                    <div style="padding: 8px; color: #999; text-align: center;">Loading leaderboard...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'https://web-production-b6313.up.railway.app';
+        let currentCode = null;
+        let currentName = null;
+        
+        async function registerStudent() {
+            const name = document.getElementById('name').value.trim();
+            
+            if (!name) {
+                showError('Please enter your name');
+                return;
+            }
+            
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name: name })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Registration failed');
+                }
+                
+                const data = await response.json();
+                currentCode = data.code;
+                currentName = name;
+                
+                document.getElementById('codeDisplay').textContent = currentCode;
+                document.getElementById('resultBox').classList.add('show');
+                document.getElementById('error').classList.remove('show');
+                
+                updateStats();
+                updateLeaderboard();
+            } catch (error) {
+                showError('Connection error: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function updateStats() {
+            try {
+                const response = await fetch(`${API_URL}/api/stats`);
+                const data = await response.json();
+                
+                document.getElementById('totalStats').textContent = data.total_registrations;
+                document.getElementById('remaining').textContent = Math.max(0, 500 - data.total_registrations);
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+        
+        async function updateLeaderboard() {
+            try {
+                const response = await fetch(`${API_URL}/api/leaderboard?limit=10`);
+                const data = await response.json();
+                
+                const leaderboardList = document.getElementById('leaderboardList');
+                
+                if (data.leaderboard && data.leaderboard.length > 0) {
+                    leaderboardList.innerHTML = data.leaderboard.map((item, index) => `
+                        <div class="leaderboard-item">
+                            <span><span class="rank">#${index + 1}</span> ${item.name}</span>
+                            <span class="stat-value">${item.referral_count} referrals</span>
+                        </div>
+                    `).join('');
+                    
+                    const yourReferrals = data.leaderboard.find(item => item.name === currentName);
+                    document.getElementById('yourReferrals').textContent = yourReferrals ? yourReferrals.referral_count : 0;
+                } else {
+                    leaderboardList.innerHTML = '<div style="padding: 8px; color: #999; text-align: center;">No referrals yet</div>';
+                }
+            } catch (error) {
+                console.error('Error updating leaderboard:', error);
+            }
+        }
+        
+        function shareWhatsApp() {
+            if (!currentCode) return;
+            
+            const message = `Hey! 🚀 Join me at NxtWave Growth!\n\nBuild Your First AI Project in 60 Minutes 🤖\n\nUse my referral code: ${currentCode}\n\nhttps://referal-tracker.vercel.app?ref=${currentCode}`;
+            const encoded = encodeURIComponent(message);
+            window.open(`https://wa.me/?text=${encoded}`, '_blank');
+        }
+        
+        function copyCode() {
+            if (currentCode) {
+                navigator.clipboard.writeText(currentCode).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        }
+        
+        function showError(msg) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = msg;
+            errorDiv.classList.add('show');
+            document.getElementById('resultBox').classList.remove('show');
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+        
+        // Load stats on page load
+        window.addEventListener('load', () => {
+            updateStats();
+            updateLeaderboard();
+        });
+    </script>
+</body>
+</html>
